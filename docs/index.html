@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Connect Claude to NETIX.AI: OAuth setup, tools, examples, data handling and troubleshooting.">
+  <title>NETIX.AI connector for Claude · Documentation</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="canonical" href="https://netix-ai-oss.github.io/documentation/">
+</head>
+<body>
+  <a class="skip" href="#guide">Skip to guide</a>
+  <header>
+    <a class="brand" href="https://www.netix.ai">NETIX<span>.AI</span></a>
+    <span class="section-label">Documentation</span>
+    <a class="brochures" href="https://www.netix.ai/brochures-and-guides">Brochures &amp; guides ↗</a>
+  </header>
+  <div class="layout">
+    <aside aria-label="Guide navigation">
+      <p class="eyebrow">Claude connector</p>
+      <nav aria-label="On this page"><a href="#before-you-start">Before you start</a>
+<a href="#connect-from-claude-on-the-web-or-claude-desktop">Connect from Claude on the web or Claude Desktop</a>
+<a href="#connect-from-claude-code">Connect from Claude Code</a>
+<a href="#what-claude-can-access">What Claude can access</a>
+<a href="#tools">Tools</a>
+<a href="#example-prompts">Example prompts</a>
+<a href="#data-handling">Data handling</a>
+<a href="#troubleshooting">Troubleshooting</a>
+<a href="#more-information">More information</a></nav>
+      <a class="source" href="https://github.com/NETIX-AI-OSS/documentation">View on GitHub ↗</a>
+    </aside>
+    <main id="guide"><h1 id="netix-ai-connector-for-claude">NETIX.AI connector for Claude</h1>
+<p>The NETIX.AI connector lets <a href="https://claude.ai">Claude</a> work with your NETIX.AI data. Ask questions in plain language and Claude looks up the answer in your organization's assets, work orders, complaints, compliance records, contracts and building telemetry. Available tools also support analysis, charts, document rendering and selected operational actions. Access depends on your deployment and permissions.</p>
+<ul>
+<li><strong>Server URL:</strong> <code>https://ml-engine.api.netixai.com/mcp</code></li>
+<li><strong>Sign-in:</strong> your NETIX.AI account (OAuth)</li>
+<li><strong>Clients:</strong> Claude web, mobile, Desktop and Claude Code, subject to client availability and organization policy</li>
+<li><strong>Support:</strong> <a href="mailto:support@netix.ai">support@netix.ai</a></li>
+</ul>
+<h2 id="before-you-start">Before you start</h2>
+<p>You need:</p>
+<ul>
+<li>A NETIX.AI account in an organization that uses the NETIX.AI platform. Ask your NETIX administrator if you don't have one.</li>
+<li>A Claude account with access to connectors. Your Claude organization administrator may need to enable the connector first.</li>
+</ul>
+<h2 id="connect-from-claude-on-the-web-or-claude-desktop">Connect from Claude on the web or Claude Desktop</h2>
+<ol>
+<li>Open <a href="https://claude.ai/customize/connectors">Customize &gt; Connectors</a> in Claude.</li>
+<li>Add a custom connector and enter the server URL <code>https://ml-engine.api.netixai.com/mcp</code>.</li>
+<li>Select <strong>Connect</strong>. Claude opens the NETIX.AI sign-in page.</li>
+<li>Sign in with your NETIX.AI account (password, MFA or single sign-on, as you normally would), then approve access on the consent screen.</li>
+<li>Back in Claude, the connector shows <strong>Connected</strong> under <strong>Your connectors</strong>.</li>
+</ol>
+<p>To use it in a conversation, turn it on from <strong>+ &gt; Connectors</strong>, then ask a question such as <em>&quot;How many open complaints do we have, grouped by status?&quot;</em></p>
+<h2 id="connect-from-claude-code">Connect from Claude Code</h2>
+<pre><code class="language-bash">claude mcp add --transport http netix-ai https://ml-engine.api.netixai.com/mcp
+</code></pre>
+<p>Then run <code>/mcp</code> inside Claude Code, choose <code>netix-ai</code>, and sign in with your NETIX.AI account in the browser window that opens.</p>
+<p>If you'd rather authenticate with a NETIX API key than sign in through the browser, install the <a href="https://github.com/NETIX-AI-OSS/netix-claude-plugin">NETIX AI plugin for Claude Code</a> instead. It bundles this connection plus a skill that teaches Claude the platform's conventions.</p>
+<h2 id="what-claude-can-access">What Claude can access</h2>
+<p>For a regular organization account, signing in ties the connector to that NETIX.AI organization. Supplying a different organization ID does not grant access to another tenant. Platform superadministrator accounts require separate administrator configuration and should not be used for routine connector access.</p>
+<p>Your NETIX administrator may limit the connector to organization administrators, or cap the number of tool calls per month. If a call is refused for either reason, Claude shows the reason it received.</p>
+<h2 id="tools">Tools</h2>
+<p>Tool names start with their area, for example <code>work_orders_reactive_work_order_list</code>. <strong>Read</strong> tools retrieve data or render supplied content. <strong>Write</strong> tools can change NETIX.AI records. Review a write call and its arguments before allowing it in your client. A connector call does not guarantee a separate NETIX approval card; a permitted write may execute immediately. Permission-gated features may refuse a call.</p>
+<h3 id="facilities-and-telemetry">Facilities and telemetry</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Type</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>facilities_realtime_data_retrieve</code></td>
+<td>Read</td>
+<td>Latest real-time sensor values for the given tags</td>
+</tr>
+<tr>
+<td><code>facilities_data_query_retrieve</code></td>
+<td>Read</td>
+<td>Historical time-series data and summary statistics for tags</td>
+</tr>
+<tr>
+<td><code>facilities_analytics_query_retrieve</code></td>
+<td>Read</td>
+<td>Analytics for one tag: thresholds, comparisons and predictions</td>
+</tr>
+<tr>
+<td><code>facilities_asset_data_card_retrieve</code></td>
+<td>Read</td>
+<td>Latest telemetry snapshot for one asset, with every tag on it</td>
+</tr>
+<tr>
+<td><code>facilities_iot_asset_status_list</code></td>
+<td>Read</td>
+<td>Current online, degraded or offline status of monitored assets</td>
+</tr>
+<tr>
+<td><code>facilities_iot_offline_log_list</code></td>
+<td>Read</td>
+<td>History of connectivity status changes</td>
+</tr>
+<tr>
+<td><code>facilities_alarm_log_list</code></td>
+<td>Read</td>
+<td>Alarm firing history</td>
+</tr>
+<tr>
+<td><code>facilities_alarm_rule_template_list</code></td>
+<td>Read</td>
+<td>Reusable alarm rule templates</td>
+</tr>
+<tr>
+<td><code>facilities_recommendation_list</code></td>
+<td>Read</td>
+<td>Your organization's published recommendations</td>
+</tr>
+<tr>
+<td><code>facilities_prediction_model_benchmark</code></td>
+<td>Compute</td>
+<td>Accuracy of a trained prediction model, plus a forward forecast</td>
+</tr>
+<tr>
+<td><code>facilities_alarm_rule_template_apply</code></td>
+<td>Write</td>
+<td>Applies an alarm rule template to an asset, creating alarm rules</td>
+</tr>
+<tr>
+<td><code>facilities_ai_alarm_config</code></td>
+<td>Write</td>
+<td>Generates alarm and fault-detection rules for an asset from a week of its data</td>
+</tr>
+<tr>
+<td><code>facilities_prediction_model_train</code></td>
+<td>Write</td>
+<td>Trains prediction models for an asset's tags</td>
+</tr>
+<tr>
+<td><code>facilities_recommendation_feedback</code></td>
+<td>Write</td>
+<td>Records your accept or dismiss decision on a recommendation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="work-orders">Work orders</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Type</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>work_orders_service_request_list</code></td>
+<td>Read</td>
+<td>Service requests</td>
+</tr>
+<tr>
+<td><code>work_orders_reactive_work_order_list</code></td>
+<td>Read</td>
+<td>Reactive work orders</td>
+</tr>
+<tr>
+<td><code>work_orders_ppm_work_order_list</code></td>
+<td>Read</td>
+<td>Planned preventive maintenance (PPM) work orders</td>
+</tr>
+<tr>
+<td><code>work_orders_ctamp_occurrence_list</code></td>
+<td>Read</td>
+<td>Scheduled PPM occurrences</td>
+</tr>
+<tr>
+<td><code>work_orders_fault_list</code></td>
+<td>Read</td>
+<td>Fault definitions and codes</td>
+</tr>
+<tr>
+<td><code>work_orders_fault_category_list</code></td>
+<td>Read</td>
+<td>Fault categories</td>
+</tr>
+<tr>
+<td><code>work_orders_service_category_list</code></td>
+<td>Read</td>
+<td>Service categories</td>
+</tr>
+<tr>
+<td><code>work_orders_material_inventory_list</code></td>
+<td>Read</td>
+<td>Spare parts, materials and stock</td>
+</tr>
+<tr>
+<td><code>work_orders_user_resolve</code></td>
+<td>Read</td>
+<td>Names and emails for user IDs found on records</td>
+</tr>
+<tr>
+<td><code>work_orders_recommendation_list</code></td>
+<td>Read</td>
+<td>Your organization's published recommendations</td>
+</tr>
+<tr>
+<td><code>work_orders_service_request_create</code></td>
+<td>Write</td>
+<td>Raises a new service request</td>
+</tr>
+<tr>
+<td><code>work_orders_reactive_work_order_create</code></td>
+<td>Write</td>
+<td>Raises a new reactive work order</td>
+</tr>
+<tr>
+<td><code>work_orders_reactive_work_order_comment_create</code></td>
+<td>Write</td>
+<td>Adds a comment to a work order</td>
+</tr>
+<tr>
+<td><code>work_orders_recommendation_feedback</code></td>
+<td>Write</td>
+<td>Records your accept or dismiss decision on a recommendation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="complaints">Complaints</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Type</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>complaints_complaint_list</code></td>
+<td>Read</td>
+<td>Complaints and their status</td>
+</tr>
+<tr>
+<td><code>complaints_complaint_activity_list</code></td>
+<td>Read</td>
+<td>Timeline of actions taken on a complaint</td>
+</tr>
+<tr>
+<td><code>complaints_complaint_escalation_list</code></td>
+<td>Read</td>
+<td>Complaint escalations and their level</td>
+</tr>
+<tr>
+<td><code>complaints_complaint_follow_up_list</code></td>
+<td>Read</td>
+<td>Scheduled and completed follow-ups</td>
+</tr>
+<tr>
+<td><code>complaints_complaint_work_order_list</code></td>
+<td>Read</td>
+<td>Work orders linked to complaints</td>
+</tr>
+<tr>
+<td><code>complaints_cafm_analytics</code></td>
+<td>Read</td>
+<td>Aggregates, time series and raw rows across CAFM records</td>
+</tr>
+<tr>
+<td><code>complaints_building_type_list</code></td>
+<td>Read</td>
+<td>Building types</td>
+</tr>
+<tr>
+<td><code>complaints_client_list</code></td>
+<td>Read</td>
+<td>Clients (tenants and customers)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="compliance">Compliance</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Type</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compliance_work_permit_list</code></td>
+<td>Read</td>
+<td>Safety work permits and their status</td>
+</tr>
+<tr>
+<td><code>compliance_audit_inspection_list</code></td>
+<td>Read</td>
+<td>Scheduled and routine inspections</td>
+</tr>
+<tr>
+<td><code>compliance_access_card_list</code></td>
+<td>Read</td>
+<td>Access cards and their approval status</td>
+</tr>
+<tr>
+<td><code>compliance_access_permit_list</code></td>
+<td>Read</td>
+<td>Visitor and contractor access permits</td>
+</tr>
+<tr>
+<td><code>compliance_access_parking_list</code></td>
+<td>Read</td>
+<td>Parking access records</td>
+</tr>
+</tbody>
+</table>
+<h3 id="commercial">Commercial</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Type</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>commercial_contract_list</code></td>
+<td>Read</td>
+<td>Contracts</td>
+</tr>
+<tr>
+<td><code>commercial_contract_sla_list</code></td>
+<td>Read</td>
+<td>Service level agreements for a contract</td>
+</tr>
+<tr>
+<td><code>commercial_quotation_list</code></td>
+<td>Read</td>
+<td>Quotations</td>
+</tr>
+<tr>
+<td><code>commercial_vendor_list</code></td>
+<td>Read</td>
+<td>Vendors and suppliers</td>
+</tr>
+</tbody>
+</table>
+<h3 id="assets">Assets</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Type</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>asset_asset_list</code></td>
+<td>Read</td>
+<td>Assets in your facility hierarchy</td>
+</tr>
+<tr>
+<td><code>asset_asset_class_list</code></td>
+<td>Read</td>
+<td>Asset classes, such as HVAC, electrical or plumbing</td>
+</tr>
+<tr>
+<td><code>asset_asset_level_list</code></td>
+<td>Read</td>
+<td>Hierarchy levels, such as site, building, floor or room</td>
+</tr>
+<tr>
+<td><code>asset_asset_map_list</code></td>
+<td>Read</td>
+<td>Asset maps for a site or building layout</td>
+</tr>
+<tr>
+<td><code>asset_recommendation_list</code></td>
+<td>Read</td>
+<td>Your organization's published recommendations</td>
+</tr>
+<tr>
+<td><code>asset_recommendation_feedback</code></td>
+<td>Write</td>
+<td>Records your accept or dismiss decision on a recommendation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="documents">Documents</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Type</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>documents_list_document_templates</code></td>
+<td>Read</td>
+<td>NETIX document and email templates</td>
+</tr>
+<tr>
+<td><code>documents_preview_document_template</code></td>
+<td>Read</td>
+<td>Renders a template with sample data to preview its layout</td>
+</tr>
+<tr>
+<td><code>documents_render_document</code></td>
+<td>Read</td>
+<td>Renders a template into branded, email-ready HTML</td>
+</tr>
+</tbody>
+</table>
+<h3 id="analysis-and-charts">Analysis and charts</h3>
+<p>Every area except Documents also has these two tools, for example <code>work_orders_execute_code</code> and <code>asset_generate_chart</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Type</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;area&gt;_execute_code</code></td>
+<td>Compute</td>
+<td>Runs Python (pandas, NumPy) in a NETIX sandbox to analyse results from earlier tool calls. Available where your deployment enables it.</td>
+</tr>
+<tr>
+<td><code>&lt;area&gt;_generate_chart</code></td>
+<td>Compute</td>
+<td>Builds a chart from data</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Compute</strong> tools perform analysis or produce chart configurations. Code execution depends on the deployment's sandbox setting. Chart generation needs analysis results in a shared execution context and can be unavailable in stateless sessions.</p>
+<h2 id="example-prompts">Example prompts</h2>
+<ul>
+<li><em>How many assets are offline right now, and since when?</em></li>
+<li><em>List reactive work orders created this week for HVAC, grouped by priority.</em></li>
+<li><em>Chart service requests per month for the last year.</em></li>
+<li><em>Which contracts expire in the next 90 days, and who are the vendors?</em></li>
+<li><em>Show the alarm history for chiller 2 over the last 7 days.</em></li>
+</ul>
+<h2 id="data-handling">Data handling</h2>
+<ul>
+<li><strong>What NETIX receives:</strong> your authentication information and each tool call's name and arguments. The connector does not automatically forward your whole Claude conversation; relevant text can be included in tool arguments.</li>
+<li><strong>Operational data:</strong> NETIX processes calls against the connected organization's services. Usage accounting and operational logging support service operation and tool-call limits. Ask NETIX for the data handling and retention terms applicable to your deployment.</li>
+<li><strong>What Claude receives:</strong> the results of each tool call, which become part of your conversation in Claude. Anthropic's handling of conversation data is covered by your Claude plan's terms.</li>
+<li><strong>Revoking access:</strong> disconnect the connector in Claude under <strong>Customize &gt; Connectors</strong>. To revoke access from the NETIX side, contact your NETIX administrator or <a href="mailto:support@netix.ai">support@netix.ai</a>.</li>
+</ul>
+<p>See the <a href="https://www.netix.ai/privacy-policy">published NETIX.AI privacy policy</a>. For questions about connector data handling or retention, contact <a href="mailto:support@netix.ai">support@netix.ai</a>.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The connector shows <strong>Connect</strong> or <strong>Reconnect</strong></td>
+<td>Sign-in didn't finish. Select it again and complete the NETIX.AI sign-in and consent screens.</td>
+</tr>
+<tr>
+<td>A tool says the integration is limited to organization administrators</td>
+<td>Your deployment restricts the connector to administrators. Ask an administrator in your organization.</td>
+</tr>
+<tr>
+<td>A tool says the organization has reached its monthly tool-call allowance</td>
+<td>Your organization has used its tool calls for the month. Contact your NETIX administrator.</td>
+</tr>
+<tr>
+<td>A tool is refused or returns an error</td>
+<td>Verify your permissions and organization configuration. Retry a bounded read query; if it still fails, contact support with the tool name and time.</td>
+</tr>
+<tr>
+<td>Results are empty</td>
+<td>Check that the data exists in NETIX.AI for your organization, for example that IoT monitoring is configured for the asset.</td>
+</tr>
+</tbody>
+</table>
+<p>For anything else, email <a href="mailto:support@netix.ai">support@netix.ai</a> with the time of the problem and the tool name Claude showed.</p>
+<h2 id="more-information">More information</h2>
+<ul>
+<li><a href="https://www.netix.ai/brochures-and-guides">NETIX.AI brochures and guides</a></li>
+<li><a href="https://www.netix.ai">NETIX.AI website</a></li>
+<li><a href="https://github.com/NETIX-AI-OSS/documentation">Documentation source</a></li>
+</ul>
+<p>Last updated: 19 October 2026. Tool availability and permissions depend on your deployment.</p>
+</main>
+  </div>
+  <footer>NETIX.AI · <a href="mailto:support@netix.ai">Support</a> · <a href="https://www.netix.ai/privacy-policy">Privacy policy</a></footer>
+</body>
+</html>
